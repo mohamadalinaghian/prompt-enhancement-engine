@@ -1,5 +1,9 @@
 //! External adapters (Jev, Prompt Writer, Summarizer) for Prompt Enhancement Engine.
 
-pub fn adapters_version() -> &'static str {
-    env!("CARGO_PKG_VERSION")
-}
+pub mod jev;
+pub mod rules;
+pub mod traits;
+
+pub use jev::JevClient;
+pub use rules::RuleDecisionEngine;
+pub use traits::{DecisionProvider, DecisionResult};
