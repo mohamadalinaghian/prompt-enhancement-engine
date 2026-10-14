@@ -1,0 +1,30 @@
+{
+  "title": "Prompt Enhancement Engine",
+  "rules": [
+    {
+      "description": "Enhance prompt in frontmost application with Prompt Enhancement Engine (Cmd + Shift + Space)",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "spacebar",
+            "modifiers": {
+              "mandatory": [
+                "command",
+                "shift"
+              ],
+              "optional": [
+                "caps_lock"
+              ]
+            }
+          },
+          "to": [
+            {
+              "shell_command": "\"$HOME/.local/bin/pe_run.sh\""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
