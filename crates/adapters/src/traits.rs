@@ -1,4 +1,7 @@
+use crate::envelope::WriterEnvelope;
 use async_trait::async_trait;
+use pe_context::EvidenceBundle;
+use pe_core::templates::TemplateContract;
 use pe_core::types::TemplateId;
 use pe_core::CoreError;
 use serde::{Deserialize, Serialize};
@@ -38,4 +41,27 @@ pub trait DecisionProvider: Send + Sync {
         task_text: &str,
         template_id: TemplateId,
     ) -> Result<DecisionResult<bool>, CoreError>;
+}
+
+/// Adapter for calling external Prompt Writer LLMs.
+#[async_trait]
+pub trait PromptWriter: Send + Sync {
+    /// Generate variable field values or a clarification request.
+    async fn generate_fields(
+        &self,
+        task_text: &str,
+        contract: &TemplateContract,
+        evidence: &EvidenceBundle,
+    ) -> Result<WriterEnvelope, CoreError>;
+}
+
+/// Adapter for condensing oversized evidence bundles.
+#[async_trait]
+pub trait ContextSummarizer: Send + Sync {
+    /// Condense raw evidence items into concise derived summaries.
+    async fn summarize(
+        &self,
+        raw_bundle: &EvidenceBundle,
+        target_tokens: usize,
+    ) -> Result<EvidenceBundle, CoreError>;
 }
