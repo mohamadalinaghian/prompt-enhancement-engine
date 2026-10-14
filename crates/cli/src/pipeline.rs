@@ -175,7 +175,7 @@ pub async fn execute_pipeline(
             // Render XML structure in Rust (D-009)
             let rendered_xml = match XmlRenderer::render(contract, &fields) {
                 Ok(xml) => xml,
-                Err(_) => return PipelineOutcome::failure(TerminalStatus::Rendered),
+                Err(_) => return PipelineOutcome::failure(TerminalStatus::ValidationFailed),
             };
 
             // Restore opaque blocks verbatim

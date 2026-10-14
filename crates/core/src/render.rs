@@ -5,6 +5,13 @@ use std::collections::HashMap;
 pub struct XmlRenderer;
 
 impl XmlRenderer {
+    /// Escape XML special characters in dynamic content to prevent prompt injection from breaking tag balance.
+    fn escape_xml_text(s: &str) -> String {
+        s.replace('&', "&amp;")
+            .replace('<', "&lt;")
+            .replace('>', "&gt;")
+    }
+
     /// Render the final XML prompt according to the template contract and provided dynamic fields.
     pub fn render(
         contract: &TemplateContract,
@@ -29,14 +36,14 @@ impl XmlRenderer {
         // 2. Render <task>
         if let Some(task) = fields.get("task") {
             out.push_str("<task>\n");
-            out.push_str(task.trim());
+            out.push_str(Self::escape_xml_text(task.trim()).as_str());
             out.push_str("\n</task>\n\n");
         }
 
         // 3. Render <acceptance_criteria>
         if let Some(ac) = fields.get("acceptance_criteria") {
             out.push_str("<acceptance_criteria>\n");
-            out.push_str(ac.trim());
+            out.push_str(Self::escape_xml_text(ac.trim()).as_str());
             out.push_str("\n</acceptance_criteria>\n\n");
         }
 
@@ -44,7 +51,7 @@ impl XmlRenderer {
         if let Some(ctx) = fields.get("context") {
             if !ctx.trim().is_empty() {
                 out.push_str("<context>\n");
-                out.push_str(ctx.trim());
+                out.push_str(Self::escape_xml_text(ctx.trim()).as_str());
                 out.push_str("\n</context>\n\n");
             }
         }
@@ -54,7 +61,7 @@ impl XmlRenderer {
         if let Some(rf) = fields.get("relevant_files") {
             if !rf.trim().is_empty() {
                 out.push_str("<relevant_files>");
-                out.push_str(rf.trim());
+                out.push_str(Self::escape_xml_text(rf.trim()).as_str());
                 out.push_str("</relevant_files>\n");
             }
         }
@@ -147,8 +154,9 @@ mod tests {
 
         assert!(rendered.starts_with("<task>\nAdd caching layer to repository\n</task>"));
         assert!(rendered.contains("<acceptance_criteria>\n- Cache hits under 5ms\n- Memory bounded to 64MB\n</acceptance_criteria>"));
-        assert!(rendered
-            .contains("<context>\n- Using lru crate\n- Thread-safe Arc<Mutex<...>>\n</context>"));
+        assert!(rendered.contains(
+            "<context>\n- Using lru crate\n- Thread-safe Arc&lt;Mutex&lt;...&gt;&gt;\n</context>"
+        ));
         assert!(rendered.contains("<relevant_files>crates/core/src/cache.rs</relevant_files>"));
         assert!(rendered.contains("<rules>"));
         assert!(rendered.contains("<verify>"));

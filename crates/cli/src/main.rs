@@ -1,12 +1,7 @@
-mod clarification;
-mod lock;
-mod pipeline;
-
 use clap::Parser;
-use lock::SingleFlightLock;
+use pe_cli::{execute_pipeline, SingleFlightLock};
 use pe_core::config::Config;
 use pe_core::TerminalStatus;
-use pipeline::execute_pipeline;
 use std::io::{self, Read};
 use std::path::PathBuf;
 use std::process::exit;
