@@ -123,12 +123,70 @@ impl FieldDrivenCollector {
             .copied()
             .unwrap_or(pe_core::templates::CollectionProfile::TargetedFile);
 
-        Ok(EvidenceBundle {
+        let bundle = EvidenceBundle {
             template_id: contract.template_id,
             profile,
             items: evidence_items,
             status,
-        })
+        };
+
+        // Log operation input/output to /tmp/[app_name]-[timestamp]-[session_name].json and copy to clipboard
+        Self::log_and_clipboard(task_text, &bundle);
+
+        Ok(bundle)
+    }
+
+    /// Logs the input and output to /tmp/[app_name]-[timestamp]-[session_name].json and copies to clipboard.
+    fn log_and_clipboard(task_text: &str, bundle: &EvidenceBundle) {
+        let app_name = std::env::var("PE_APP_NAME")
+            .unwrap_or_else(|_| "unknown_app".to_string())
+            .replace('/', "_");
+        let session_name = format!("{:?}", bundle.template_id).to_lowercase();
+        let timestamp = chrono::Utc::now().format("%Y%m%d_%H%M%S_%3f").to_string();
+
+        let filename = format!("{}-{}-{}.json", app_name, timestamp, session_name);
+        let log_path = std::path::Path::new("/tmp").join(filename);
+
+        let log_data = serde_json::json!({
+            "app_name": app_name,
+            "session_name": session_name,
+            "timestamp": timestamp,
+            "input": {
+                "task_text": task_text,
+            },
+            "output": {
+                "template_id": bundle.template_id.as_str(),
+                "profile": format!("{:?}", bundle.profile),
+                "status": format!("{:?}", bundle.status),
+                "model_facing_evidence": bundle.format_model_facing(),
+                "item_count": bundle.len(),
+            }
+        });
+
+        if let Ok(json_str) = serde_json::to_string_pretty(&log_data) {
+            let _ = std::fs::write(&log_path, json_str);
+        }
+
+        // Copy final output representation to system clipboard
+        Self::copy_to_clipboard(&bundle.format_model_facing());
+    }
+
+    /// Helper to place content on the system clipboard using pbcopy on macOS
+    fn copy_to_clipboard(content: &str) {
+        use std::io::Write;
+        use std::process::{Command, Stdio};
+
+        if let Ok(mut child) = Command::new("pbcopy")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+        {
+            if let Some(mut stdin) = child.stdin.take() {
+                let _ = stdin.write_all(content.as_bytes());
+            }
+            let _ = child.wait();
+        }
     }
 
     /// Extract file path hints mentioned in the prompt text.
@@ -213,5 +271,36 @@ mod tests {
         assert!(!item.content.contains("sk-1234567890abcdef1234567890"));
         assert!(item.content.contains("[[SECRET_PE_"));
         assert_eq!(item.classification, Classification::DirectObservation);
+    }
+
+    #[test]
+    fn test_collect_writes_json_log_and_copies_clipboard() {
+        std::env::set_var("PE_APP_NAME", "testeditor");
+        let dir = tempdir().unwrap();
+        let root_path = dir.path().canonicalize().unwrap();
+        let root = ValidatedProjectRoot::new(root_path.clone());
+
+        let contract = &IMPL_REFACTOR_CONTRACT;
+        let task = "Refactor test logic";
+
+        let bundle =
+            FieldDrivenCollector::collect(contract, task, Some(&root), &Config::default()).unwrap();
+        assert!(!bundle.template_id.as_str().is_empty());
+
+        // Verify a matching JSON log exists in /tmp
+        let entries = std::fs::read_dir("/tmp").unwrap();
+        let mut found = false;
+        for entry in entries.flatten() {
+            let name = entry.file_name().to_string_lossy().to_string();
+            if name.starts_with("testeditor-") && name.ends_with(".json") {
+                let content = std::fs::read_to_string(entry.path()).unwrap();
+                assert!(content.contains("\"app_name\": \"testeditor\""));
+                assert!(content.contains("\"task_text\": \"Refactor test logic\""));
+                let _ = std::fs::remove_file(entry.path());
+                found = true;
+                break;
+            }
+        }
+        assert!(found, "Expected JSON log file in /tmp");
     }
 }

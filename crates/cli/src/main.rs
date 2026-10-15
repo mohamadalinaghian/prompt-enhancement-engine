@@ -35,6 +35,9 @@ struct Args {
 async fn main() {
     let args = Args::parse();
 
+    // Propagate application name for logging
+    std::env::set_var("PE_APP_NAME", &args.app);
+
     // 1. Acquire Single-Flight Runtime Lock (D-014, exit code 3 if busy)
     let _lock = match SingleFlightLock::acquire(args.lock_path.as_deref()) {
         Ok(l) => l,
