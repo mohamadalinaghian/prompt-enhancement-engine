@@ -134,27 +134,47 @@ pub async fn execute_pipeline(
         evidence_bundle
     };
 
-    // 6. Prompt Writer LLM Field Population (D-009)
+    // 6. Prompt Writer LLM Field Population with Fallback Chain (D-009)
     let envelope = if force_no_llm {
         LlmWriter::generate_offline_fallback(&redacted_task, contract)
     } else {
-        let writer = LlmWriter::new(
-            config.writer_model.endpoint.clone(),
-            config.writer_model.model_name.clone(),
-            std::env::var(&config.writer_model.api_key_env).ok(),
-            config.budgets.writer_timeout_ms,
-        );
+        let mut model_chain = vec![config.writer_model.clone()];
+        model_chain.extend(config.writer_model.fallback_models.clone());
 
-        match writer
-            .generate_fields(&redacted_task, contract, &final_evidence)
-            .await
-        {
-            Ok(env) => env,
-            Err(CoreError::TemplateContractMismatch(_)) => {
-                // If model fails required contract, try offline fallback once
+        let mut candidate_result = None;
+
+        for model_cfg in model_chain {
+            let api_key = std::env::var(&model_cfg.api_key_env).ok();
+            let writer = LlmWriter::new(
+                model_cfg.endpoint.clone(),
+                model_cfg.model_name.clone(),
+                api_key,
+                config.budgets.writer_timeout_ms,
+            );
+
+            match writer
+                .generate_fields(&redacted_task, contract, &final_evidence)
+                .await
+            {
+                Ok(env) => {
+                    candidate_result = Some(env);
+                    break;
+                }
+                Err(e) => {
+                    eprintln!(
+                        "Model {} ({:?}) failed: {}. Trying next fallback...",
+                        model_cfg.model_name, model_cfg.endpoint, e
+                    );
+                }
+            }
+        }
+
+        match candidate_result {
+            Some(env) => env,
+            None => {
+                // If all configured chain models fail or no endpoints configured, fallback to offline generator
                 LlmWriter::generate_offline_fallback(&redacted_task, contract)
             }
-            Err(_) => return PipelineOutcome::failure(TerminalStatus::WriterFailed),
         }
     };
 

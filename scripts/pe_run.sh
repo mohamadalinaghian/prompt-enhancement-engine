@@ -11,20 +11,24 @@ export LC_ALL=en_US.UTF-8
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
 # Resolve environment keys if launched in a minimal environment (e.g. Karabiner env -i)
-if [ -z "${OPENAI_API_KEY:-}" ] && [ -z "${GROQ_API_KEY:-}" ]; then
+if [ -z "${OPENROUTER_API_KEY:-}" ] || [ -z "${GROQ_API_KEY:-}" ] || [ -z "${TYPESAFE_API_KEY:-}" ]; then
     for shell_bin in "/bin/zsh" "/bin/bash" "/opt/homebrew/bin/fish"; do
         if [ -x "$shell_bin" ]; then
             if [ "$shell_bin" = "/opt/homebrew/bin/fish" ]; then
-                [ -z "${OPENAI_API_KEY:-}" ] && OPENAI_API_KEY=$("$shell_bin" -c "echo -n \$OPENAI_API_KEY" 2>/dev/null || true)
+                [ -z "${OPENROUTER_API_KEY:-}" ] && OPENROUTER_API_KEY=$("$shell_bin" -c "echo -n \$OPENROUTER_API_KEY" 2>/dev/null || true)
                 [ -z "${GROQ_API_KEY:-}" ] && GROQ_API_KEY=$("$shell_bin" -c "echo -n \$GROQ_API_KEY" 2>/dev/null || true)
+                [ -z "${TYPESAFE_API_KEY:-}" ] && TYPESAFE_API_KEY=$("$shell_bin" -c "echo -n \$TYPESAFE_API_KEY" 2>/dev/null || true)
+                [ -z "${OPENAI_API_KEY:-}" ] && OPENAI_API_KEY=$("$shell_bin" -c "echo -n \$OPENAI_API_KEY" 2>/dev/null || true)
             else
-                [ -z "${OPENAI_API_KEY:-}" ] && OPENAI_API_KEY=$("$shell_bin" -l -c "echo -n \$OPENAI_API_KEY" 2>/dev/null || true)
+                [ -z "${OPENROUTER_API_KEY:-}" ] && OPENROUTER_API_KEY=$("$shell_bin" -l -c "echo -n \$OPENROUTER_API_KEY" 2>/dev/null || true)
                 [ -z "${GROQ_API_KEY:-}" ] && GROQ_API_KEY=$("$shell_bin" -l -c "echo -n \$GROQ_API_KEY" 2>/dev/null || true)
+                [ -z "${TYPESAFE_API_KEY:-}" ] && TYPESAFE_API_KEY=$("$shell_bin" -l -c "echo -n \$TYPESAFE_API_KEY" 2>/dev/null || true)
+                [ -z "${OPENAI_API_KEY:-}" ] && OPENAI_API_KEY=$("$shell_bin" -l -c "echo -n \$OPENAI_API_KEY" 2>/dev/null || true)
             fi
-            [ -n "${OPENAI_API_KEY:-}" ] || [ -n "${GROQ_API_KEY:-}" ] && break
+            [ -n "${GROQ_API_KEY:-}" ] && [ -n "${OPENROUTER_API_KEY:-}" ] && break
         fi
     done
-    export OPENAI_API_KEY GROQ_API_KEY
+    export OPENROUTER_API_KEY GROQ_API_KEY TYPESAFE_API_KEY OPENAI_API_KEY
 fi
 
 # 1. Debounce to ensure physical modifier keys from shortcut are released

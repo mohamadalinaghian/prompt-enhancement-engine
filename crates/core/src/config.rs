@@ -67,6 +67,8 @@ pub struct ModelConfig {
     pub endpoint: Option<String>,
     pub model_name: String,
     pub api_key_env: String,
+    #[serde(default)]
+    pub fallback_models: Vec<ModelConfig>,
 }
 
 impl Default for ModelConfig {
@@ -76,6 +78,7 @@ impl Default for ModelConfig {
             endpoint: None,
             model_name: "default".to_string(),
             api_key_env: "LLM_API_KEY".to_string(),
+            fallback_models: Vec::new(),
         }
     }
 }

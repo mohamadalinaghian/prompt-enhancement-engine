@@ -165,7 +165,16 @@ impl PromptWriter for LlmWriter {
         };
 
         let url = format!("{}/chat/completions", endpoint.trim_end_matches('/'));
-        let mut req = self.http_client.post(&url).json(&req_body);
+        let mut req = self
+            .http_client
+            .post(&url)
+            .header("User-Agent", "PromptEnhancementEngine/1.0")
+            .header(
+                "HTTP-Referer",
+                "https://github.com/prompt_enhancement_engine",
+            )
+            .header("X-Title", "Prompt Enhancement Engine")
+            .json(&req_body);
         if let Some(ref key) = self.api_key {
             req = req.bearer_auth(key);
         }
