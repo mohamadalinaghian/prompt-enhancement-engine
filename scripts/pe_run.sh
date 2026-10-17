@@ -102,7 +102,8 @@ fi
 STDERR_FILE=$(mktemp /tmp/pe_stderr.XXXXXX)
 STDOUT_PAYLOAD=$(printf "%s" "$COPIED" | "$PE_BIN" --app "$INITIAL_APP" 2> "$STDERR_FILE")
 EXIT_CODE=$?
-STATUS_MSG=$(head -n 1 "$STDERR_FILE" | tr -d '\r' || echo "Completed")
+# Extract final machine-readable status (last line of stderr, per workflow-integration.md §4)
+STATUS_MSG=$(tail -n 1 "$STDERR_FILE" | tr -d '\r' || echo "Completed")
 rm -f "$STDERR_FILE"
 
 ESCAPED_MSG=$(echo "$STATUS_MSG" | sed 's/"/\\"/g')

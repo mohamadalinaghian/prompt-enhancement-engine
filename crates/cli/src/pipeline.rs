@@ -246,7 +246,7 @@ mod tests {
         assert!(outcome.output_payload.is_some());
         let output = outcome.output_payload.unwrap();
 
-        assert!(output.starts_with("<task>"));
+        assert!(output.starts_with("<task session=\"debug_bugfix\">"));
         assert!(output.contains("<acceptance_criteria>"));
         assert!(output.contains("<rules>"));
         assert!(output.contains("<report>"));

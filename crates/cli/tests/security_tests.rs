@@ -72,7 +72,7 @@ async fn test_prompt_injection_delimiters_preserved_safely() {
     let payload = outcome.output_payload.expect("Payload rendered");
 
     // The output XML must still be structurally sound
-    assert!(payload.starts_with("<task>"));
+    assert!(payload.starts_with("<task session="));
     assert!(payload.contains("</task>"));
     assert!(payload.contains("<rules>"));
     assert!(payload.contains("</rules>"));

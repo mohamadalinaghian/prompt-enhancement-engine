@@ -130,13 +130,13 @@ impl FieldDrivenCollector {
             status,
         };
 
-        // Log operation input/output to /tmp/[app_name]-[timestamp]-[session_name].json and copy to clipboard
+        // Log operation input/output to /tmp/prompt_enhancer/[app_name]-[timestamp]-[session_name].json and copy to clipboard
         Self::log_and_clipboard(task_text, &bundle);
 
         Ok(bundle)
     }
 
-    /// Logs the input and output to /tmp/[app_name]-[timestamp]-[session_name].json and copies to clipboard.
+    /// Logs the input and output to /tmp/prompt_enhancer/[app_name]-[timestamp]-[session_name].json and copies to clipboard.
     fn log_and_clipboard(task_text: &str, bundle: &EvidenceBundle) {
         let app_name = std::env::var("PE_APP_NAME")
             .unwrap_or_else(|_| "unknown_app".to_string())
@@ -145,7 +145,9 @@ impl FieldDrivenCollector {
         let timestamp = chrono::Utc::now().format("%Y%m%d_%H%M%S_%3f").to_string();
 
         let filename = format!("{}-{}-{}.json", app_name, timestamp, session_name);
-        let log_path = std::path::Path::new("/tmp").join(filename);
+        let log_dir = std::path::Path::new("/tmp/prompt_enhancer");
+        let _ = std::fs::create_dir_all(log_dir);
+        let log_path = log_dir.join(filename);
 
         let log_data = serde_json::json!({
             "app_name": app_name,
@@ -275,7 +277,8 @@ mod tests {
 
     #[test]
     fn test_collect_writes_json_log_and_copies_clipboard() {
-        std::env::set_var("PE_APP_NAME", "testeditor");
+        let test_app = format!("testeditor_{}", std::process::id());
+        std::env::set_var("PE_APP_NAME", &test_app);
         let dir = tempdir().unwrap();
         let root_path = dir.path().canonicalize().unwrap();
         let root = ValidatedProjectRoot::new(root_path.clone());
@@ -287,20 +290,22 @@ mod tests {
             FieldDrivenCollector::collect(contract, task, Some(&root), &Config::default()).unwrap();
         assert!(!bundle.template_id.as_str().is_empty());
 
-        // Verify a matching JSON log exists in /tmp
-        let entries = std::fs::read_dir("/tmp").unwrap();
+        // Verify a matching JSON log exists in /tmp/prompt_enhancer
+        let entries = std::fs::read_dir("/tmp/prompt_enhancer").unwrap();
         let mut found = false;
+        let prefix = format!("{}-", test_app);
         for entry in entries.flatten() {
             let name = entry.file_name().to_string_lossy().to_string();
-            if name.starts_with("testeditor-") && name.ends_with(".json") {
+            if name.starts_with(&prefix) && name.ends_with(".json") {
                 let content = std::fs::read_to_string(entry.path()).unwrap();
-                assert!(content.contains("\"app_name\": \"testeditor\""));
-                assert!(content.contains("\"task_text\": \"Refactor test logic\""));
                 let _ = std::fs::remove_file(entry.path());
-                found = true;
-                break;
+                if content.contains(&format!("\"app_name\": \"{}\"", test_app))
+                    && content.contains("\"task_text\": \"Refactor test logic\"")
+                {
+                    found = true;
+                }
             }
         }
-        assert!(found, "Expected JSON log file in /tmp");
+        assert!(found, "Expected JSON log file in /tmp/prompt_enhancer");
     }
 }

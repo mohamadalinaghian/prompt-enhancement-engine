@@ -36,7 +36,7 @@ static IMPL_REFACTOR_FIELDS: [FieldContract; 4] = [
 static IMPL_REFACTOR_STATIC: StaticSections = StaticSections {
     rules: "- Be EXTREMELY concise. The user skims text. Do not explain how code works unless asked.\n- Follow existing patterns in the repo; check neighboring files first.\n- No mock data or swallowed errors; handle failures explicitly.\n- Ask before: destructive actions, schema or public API changes.\n- Preserve existing comments and docstrings unrelated to your changes.\n- Never delete or weaken existing tests to make a build pass.\n- For other ambiguity, pick the most reasonable option and list it in the report.",
     verify: Some("- Run type check and build (`cargo check` or equivalent build command)\n- Run unit and integration tests (`cargo test --workspace -- --test-threads=1`)\n- Run linter and formatter check (`cargo clippy`, `cargo fmt --check`)"),
-    report: "KEEP YOUR RESPONSE EXTREMELY SHORT.\n1. 🎯 **Key Changes**: (bullet points, max 1 line each)\n2. ⚠️ **Important / Blockers**: (assumptions, blockers, or critical decisions)\n3. 📋 **Remaining Tasks**: (what is left to do, actionable items)",
+    report: "KEEP YOUR RESPONSE EXTREMELY SHORT.\n1. 🎯 **Key Changes**: (bullet points, max 1 line each)\n2. 💡 **Important Context**: (assumptions, architectural notes, or critical decisions)\n3. ⚠️ **Blockers**: (active impediments, missing access, or dependencies)\n4. 📋 **Remaining Tasks**: (what is left to do, actionable items)",
     out_of_scope: "Unrelated modules, breaking public API changes without prior approval, rewriting passing tests",
 };
 
@@ -587,7 +587,7 @@ static GENERAL_FIELDS: [FieldContract; 4] = [
 static GENERAL_STATIC: StaticSections = StaticSections {
     rules: "- Be EXTREMELY concise. The user skims text. Do not explain how code works unless asked.\n- Follow existing patterns in the repo; check neighboring files first.\n- No mock data or swallowed errors; handle failures explicitly.\n- Ask before: destructive actions, schema or public API changes.\n- For other ambiguity, pick the most reasonable option and list it in the report.",
     verify: Some("- Run workspace test suite: `cargo test --workspace -- --test-threads=1`\n- Run linter: `cargo clippy --workspace --all-targets -- -D warnings`"),
-    report: "KEEP YOUR RESPONSE EXTREMELY SHORT.\n1. 🎯 **Key Changes**: (bullet points, max 1 line each)\n2. ⚠️ **Important / Blockers**: (assumptions, blockers, or critical decisions)\n3. 📋 **Remaining Tasks**: (what is left to do, actionable items)",
+    report: "KEEP YOUR RESPONSE EXTREMELY SHORT.\n1. 🎯 **Key Changes**: (bullet points, max 1 line each)\n2. 💡 **Important Context**: (assumptions, architectural notes, or critical decisions)\n3. ⚠️ **Blockers**: (active impediments, missing access, or dependencies)\n4. 📋 **Remaining Tasks**: (what is left to do, actionable items)",
     out_of_scope: "Unrelated modules, destructive changes without approval, breaking public APIs",
 };
 

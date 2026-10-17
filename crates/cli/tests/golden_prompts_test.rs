@@ -128,8 +128,11 @@ async fn test_all_15_golden_prompts() {
 
         // Required tag presence
         assert!(
-            payload.contains("<task>"),
-            "Scenario '{}' missing <task>",
+            payload.contains(&format!(
+                "<task session=\"{}\">",
+                scenario.expected_template.as_str()
+            )),
+            "Scenario '{}' missing <task session=\"...\">",
             scenario.name
         );
         assert!(

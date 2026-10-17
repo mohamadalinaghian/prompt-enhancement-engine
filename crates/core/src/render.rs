@@ -33,9 +33,12 @@ impl XmlRenderer {
 
         let mut out = String::with_capacity(2048);
 
-        // 2. Render <task>
+        // 2. Render <task session="...">
         if let Some(task) = fields.get("task") {
-            out.push_str("<task>\n");
+            out.push_str(&format!(
+                "<task session=\"{}\">\n",
+                contract.template_id.as_str()
+            ));
             out.push_str(Self::escape_xml_text(task.trim()).as_str());
             out.push_str("\n</task>\n\n");
         }
@@ -106,10 +109,11 @@ impl XmlRenderer {
         let tags = ["task", "acceptance_criteria", "scope", "rules", "report"];
 
         for tag in tags {
-            let open = format!("<{}>", tag);
             let close = format!("</{}>", tag);
+            let open_exact = format!("<{}>", tag);
+            let open_attr = format!("<{} ", tag);
 
-            let open_count = xml.matches(&open).count();
+            let open_count = xml.matches(&open_exact).count() + xml.matches(&open_attr).count();
             let close_count = xml.matches(&close).count();
 
             if open_count != close_count {
@@ -152,7 +156,7 @@ mod tests {
 
         let rendered = XmlRenderer::render(contract, &fields).unwrap();
 
-        assert!(rendered.starts_with("<task>\nAdd caching layer to repository\n</task>"));
+        assert!(rendered.starts_with("<task session=\"implementation_refactoring\">\nAdd caching layer to repository\n</task>"));
         assert!(rendered.contains("<acceptance_criteria>\n- Cache hits under 5ms\n- Memory bounded to 64MB\n</acceptance_criteria>"));
         assert!(rendered.contains(
             "<context>\n- Using lru crate\n- Thread-safe Arc&lt;Mutex&lt;...&gt;&gt;\n</context>"
