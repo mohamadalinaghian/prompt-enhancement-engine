@@ -31,7 +31,7 @@ LOCK_FILE="$TMP_DIR/test_pe.lock"
 # Test success (code 0)
 OUTPUT=$(echo "Fix null pointer crash in user login handler" | "$REPO_DIR/target/debug/pe" --no-llm --lock-path "$LOCK_FILE" 2>/dev/null)
 CODE=$?
-if [ "$CODE" -eq 0 ] && echo "$OUTPUT" | grep -q "<task>"; then
+if [ "$CODE" -eq 0 ] && echo "$OUTPUT" | grep -q "<task session="; then
     echo "✓ Success scenario: exit code 0, rendered XML"
 else
     echo "✗ Success scenario failed with exit code $CODE"

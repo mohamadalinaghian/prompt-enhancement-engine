@@ -47,7 +47,8 @@ Unrelated modules, destructive changes without approval, breaking public API con
 ```text
 KEEP YOUR RESPONSE EXTREMELY SHORT.
 1. 🎯 **Key Changes**: (bullet points, max 1 line each)
-2. ⚠️ **Important / Blockers**: (assumptions, blockers, or critical decisions)
+2. ⚠️ **Important**: (assumptions, blockers, or critical decisions)
+3. ⚠️ **Blockers**: (assumptions, blockers, or critical decisions)
 3. 📋 **Remaining Tasks**: (what is left to do, actionable items)
 ```
 
