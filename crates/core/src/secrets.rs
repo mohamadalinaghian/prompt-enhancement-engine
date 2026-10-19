@@ -1,6 +1,26 @@
 use regex::Regex;
 use std::collections::HashMap;
+use std::sync::LazyLock;
 use uuid::Uuid;
+
+static SECRET_PATTERNS: LazyLock<Vec<Regex>> = LazyLock::new(|| {
+    vec![
+        // AWS Access Key ID (standard 20 chars total: AKIA + 16 chars)
+        Regex::new(r"\b(AKIA[0-9A-Z]{16,20})\b").unwrap(),
+        // GitHub personal access tokens
+        Regex::new(r"\b(gh[pousr]_[A-Za-z0-9_]{36,})\b").unwrap(),
+        // OpenAI and standard sk- keys
+        Regex::new(r"\b(sk-[a-zA-Z0-9_\-]{20,})\b").unwrap(),
+        // Slack tokens
+        Regex::new(r"\b(xox[baprs]-[A-Za-z0-9_\-]+)\b").unwrap(),
+        // Private keys
+        Regex::new(r"(-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----[\s\S]*?-----END (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----)").unwrap(),
+        // Generic authorization bearer tokens
+        Regex::new(r"(?i)\bBearer\s+([A-Za-z0-9\._\-]{25,})\b").unwrap(),
+        // Connection strings with passwords
+        Regex::new(r"(?i)([a-z]+://[^:\s]+:[^@\s]+@[^/\s]+)").unwrap(),
+    ]
+});
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct SecretMap {
@@ -41,28 +61,9 @@ impl SecretScanner {
     pub fn redact(text: &str) -> (String, SecretMap) {
         let mut secret_map = SecretMap::new();
 
-        // High precision patterns for common secrets and credentials
-        let patterns = [
-            // AWS Access Key ID (standard 20 chars total: AKIA + 16 chars)
-            r"\b(AKIA[0-9A-Z]{16,20})\b",
-            // GitHub personal access tokens
-            r"\b(gh[pousr]_[A-Za-z0-9_]{36,})\b",
-            // OpenAI and standard sk- keys
-            r"\b(sk-[a-zA-Z0-9_\-]{20,})\b",
-            // Slack tokens
-            r"\b(xox[baprs]-[A-Za-z0-9_\-]+)\b",
-            // Private keys
-            r"(-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----[\s\S]*?-----END (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----)",
-            // Generic authorization bearer tokens
-            r"(?i)\bBearer\s+([A-Za-z0-9\._\-]{25,})\b",
-            // Connection strings with passwords
-            r"(?i)([a-z]+://[^:\s]+:[^@\s]+@[^/\s]+)",
-        ];
-
         let mut redacted_text = text.to_string();
 
-        for pat in patterns {
-            let re = Regex::new(pat).unwrap();
+        for re in SECRET_PATTERNS.iter() {
             let mut matches_to_replace = Vec::new();
 
             for cap in re.captures_iter(&redacted_text) {
