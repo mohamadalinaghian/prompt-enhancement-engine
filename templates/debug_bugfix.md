@@ -65,7 +65,7 @@ The following placeholders are populated dynamically from user input, context bu
 ## 3. Standardized XML Prompt Template
 
 ```xml
-<task>
+<task session= {{debug_bugfix}}>
 Fix bug / failure: {{bug_description_or_error_message}}
 </task>
 

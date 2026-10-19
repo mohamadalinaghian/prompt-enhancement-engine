@@ -64,7 +64,7 @@ The following placeholders are populated dynamically from user input, context bu
 ## 3. Standardized XML Prompt Template
 
 ```xml
-<task>
+<task session= {{devops_deployment}}>
 Configure / deploy infrastructure for: {{infrastructure_or_service_target}}
 </task>
 

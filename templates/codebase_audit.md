@@ -63,7 +63,7 @@ The following placeholders are populated dynamically from user input, context bu
 ## 3. Standardized XML Prompt Template
 
 ```xml
-<task>
+<task session= {{codebase_audit}}>
 Audit codebase for: {{audit_focus_area_e.g._security_permissions_memory}}
 </task>
 

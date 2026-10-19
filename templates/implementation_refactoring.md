@@ -50,9 +50,9 @@ Unrelated modules, breaking public API changes without prior approval, premature
 ```text
 KEEP YOUR RESPONSE EXTREMELY SHORT.
 1. 🎯 **Key Changes**: (bullet points, max 1 line each)
-2. ⚠️ **Important**: (assumptions, blockers, or critical decisions)
-3. ⚠️ **Blockers**: (assumptions, blockers, or critical decisions)
-3. 📋 **Remaining Tasks**: (what is left to do, actionable items)
+2. ⚠️ **Important**: (assumptions, critical decisions)
+3. 🚫 **Blockers**: (items actively blocking progres)
+4. 📋 **Remaining Tasks**: (what is left to do, actionable items)
 ```
 
 ### Dynamic Runtime Inputs
@@ -67,7 +67,7 @@ The following placeholders are populated dynamically from user input, context bu
 ## 3. Standardized XML Prompt Template
 
 ```xml
-<task>
+<task session= {{implementation_refactoring}}>
 {{task_description}}
 </task>
 
@@ -106,7 +106,8 @@ The following placeholders are populated dynamically from user input, context bu
 <report>
 KEEP YOUR RESPONSE EXTREMELY SHORT.
 1. 🎯 **Key Changes**: (bullet points, max 1 line each)
-2. ⚠️ **Important / Blockers**: (assumptions, blockers, or critical decisions)
-3. 📋 **Remaining Tasks**: (what is left to do, actionable items)
+2. ⚠️ **Important**: (assumptions, critical decisions)
+3. 🚫 **Blockers**: (items actively blocking progres)
+4. 📋 **Remaining Tasks**: (what is left to do, actionable items)
 </report>
 ```

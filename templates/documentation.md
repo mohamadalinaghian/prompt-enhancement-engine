@@ -64,7 +64,7 @@ The following placeholders are populated dynamically from user input, context bu
 ## 3. Standardized XML Prompt Template
 
 ```xml
-<task>
+<task session= {{documentation}}>
 Update / create documentation for: {{documentation_target}}
 </task>
 

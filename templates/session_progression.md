@@ -57,7 +57,7 @@ The following placeholders are populated dynamically from user input, context bu
 ## 3. Standardized XML Prompt Template
 
 ```xml
-<task>
+<task session= {{session_progression}}>
 Execute Step {{step_number}}: {{step_title}}
 </task>
 

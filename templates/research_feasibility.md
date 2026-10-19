@@ -61,7 +61,7 @@ The following placeholders are populated dynamically from user input, context bu
 ## 3. Standardized XML Prompt Template
 
 ```xml
-<task>
+<task session= {{research_feasibility}}>
 Research feasibility and options for: {{research_topic_or_tool_options}}
 </task>
 

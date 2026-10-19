@@ -63,7 +63,7 @@ The following placeholders are populated dynamically from user input, context bu
 ## 3. Standardized XML Prompt Template
 
 ```xml
-<task>
+<task session= {{config_tooling}}>
 Configure tool / environment: {{tool_or_config_target}}
 </task>
 

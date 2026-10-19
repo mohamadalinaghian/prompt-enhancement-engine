@@ -65,7 +65,7 @@ The following placeholders are populated dynamically from user input, context bu
 ## 3. Standardized XML Prompt Template
 
 ```xml
-<task>
+<task session= {{testing_verification}}>
 Add comprehensive tests for: {{target_module_or_feature}}
 </task>
 

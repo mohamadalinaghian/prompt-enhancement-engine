@@ -62,7 +62,7 @@ The following placeholders are populated dynamically from user input, context bu
 ## 3. Standardized XML Prompt Template
 
 ```xml
-<task>
+<task session= {{plan_architecture}}>
 Create an implementation plan for: {{feature_or_refactor_goal}}
 </task>
 

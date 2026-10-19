@@ -63,7 +63,7 @@ The following placeholders are populated dynamically from user input, context bu
 ## 3. Standardized XML Prompt Template
 
 ```xml
-<task>
+<task session= {{git_vcs}}>
 Perform git operation: {{git_task_description_e.g._commit_changes_or_create_pr}}
 </task>
 

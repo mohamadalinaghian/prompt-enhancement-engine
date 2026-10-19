@@ -64,7 +64,7 @@ The following placeholders are populated dynamically from user input, context bu
 ## 3. Standardized XML Prompt Template
 
 ```xml
-<task>
+<task session= {{prompt_engineering}}>
 Author / optimize prompt template for: {{prompt_target_or_use_case}}
 </task>
 

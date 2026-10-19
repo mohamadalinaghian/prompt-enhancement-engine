@@ -69,18 +69,15 @@ impl LlmSummarizer {
         let mut condensed_items = Vec::new();
 
         for item in &raw_bundle.items {
-            let condensed_content = if item.content.len() > 300 {
-                format!(
-                    "{}...\n[Condensed {} bytes to excerpt]",
-                    &item.content[..250],
-                    item.content.len()
-                )
-            } else {
-                item.content.clone()
-            };
-
+            // Clone the item once and conditionally condense its content.
             let mut summarized_item = item.clone();
-            summarized_item.content = condensed_content;
+            if summarized_item.content.len() > 300 {
+                summarized_item.content = format!(
+                    "{}...\n[Condensed {} bytes to excerpt]",
+                    &summarized_item.content[..250],
+                    summarized_item.content.len()
+                );
+            }
             summarized_item.classification = Classification::DerivedSummary;
             condensed_items.push(summarized_item);
         }
